@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Twilio Is Fun</title>
+        <style>
+            .entry {
+                padding: 20px;
+                border-bottom: 2px solid black;
+                font-size: 20px;
+            }
+            .date {
+                color: gray;
+            }
+            .number {
+                color: #C00;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Messages <code>+1 510 298 3370</code></h1>
+        <div id='container'>Loading</div>
+        
+        <script id="template" type="text/template">
+            <div class="entry">
+                <span class="date"><%= timestamp %></span>
+                <span class="number" style="color: <%= color %>"><%= number %></span>
+                <span class="message"><%= message %></span>
+            </div>
+        </script>
+        
+        <script src="//code.jquery.com/jquery-1.12.3.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.11.2/lodash.min.js"></script>
+		<script src="//www.checkman.io/please/js/Please-compressed.js"></script>
+		<script>
+    		/* global $ */
+    		/* global _ */
+            var $div = $('#container');
+            var tpl = _.template($('#template').html());
+            
+            function draw(data) {
+                $div.empty();
+                if (data.length == 0) {
+                    $div.append('<strong>Nothing Yet...</strong>');
+                } else {
+                    _.each(data, function(v,k) {
+                        v['color'] = getColor(v['number']);
+                        $div.append(tpl(v));
+                    });
+                }
+            }
+            
+            function getData() {
+                console.log("doing ajax", new Date());
+                $.getJSON('/data', function (data) {
+                    draw(data);
+                    window.setTimeout(getData, 500);
+                });
+            }
+            
+            var colors = [];
+            function getColor(number) {
+                if (!(number in colors)) {
+                    colors[number] = Please.make_color();
+                } 
+                return colors[number];
+            }
+            
+            $(function () {
+                getData();
+            });
+		</script>
+    </body>
+</html>
